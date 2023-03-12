@@ -14,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/Palkesh-7/doctorv2.git/models"
 )
 
 func add_docter(c *gin.Context) {
@@ -25,7 +27,7 @@ func add_docter(c *gin.Context) {
 
 	}
 
-	var data models.doctor
+	var data models.Doctor
 
 	err = c.BindJSON(&data)
 
