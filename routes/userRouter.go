@@ -1,8 +1,8 @@
 package routes
 
 import(
-	controller "Golang-JWT-Gin-Authentication-project/controllers"
-	"Golang-JWT-Gin-Authentication-project/middleware"
+	controller "Doctor-Appointment-Project/controllers"
+	"Doctor-Appointment-Project/middleware"
 	"github.com/gin-gonic/gin"
 )
 

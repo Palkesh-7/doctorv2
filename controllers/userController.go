@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"Golang-JWT-Gin-Authentication-project/database"
-	helper "Golang-JWT-Gin-Authentication-project/helpers"
-	"Golang-JWT-Gin-Authentication-project/models"
+	"Doctor-Appointment-Project/database"
+	helper "Doctor-Appointment-Project/helpers"
+	"Doctor-Appointment-Project/models"
 	"context"
 	"fmt"
 	"log"

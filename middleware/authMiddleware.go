@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	helper "Golang-JWT-Gin-Authentication-project/helpers"
+	helper "Doctor-Appointment-Project/helpers"
 	"fmt"
 	"net/http"
 

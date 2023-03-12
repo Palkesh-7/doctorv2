@@ -1,4 +1,4 @@
-module Golang-JWT-Gin-Authentication-project
+module Doctor-Appointment-Project
 
 go 1.16
 

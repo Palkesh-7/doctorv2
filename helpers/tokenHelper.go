@@ -1,12 +1,13 @@
 package helper
 
 import (
+	"Doctor-Appointment-Project/database"
 	"context"
 	"fmt"
 	"log"
 	"os"
 	"time"
-	"Golang-JWT-Gin-Authentication-project/database"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
