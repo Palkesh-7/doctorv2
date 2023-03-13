@@ -14,11 +14,8 @@ type Patient struct {
 }
 
 type Appointment struct {
-	Bookingid int
-
-	Patient_id int
-
-	Doctor_id int
-
+	Bookingid    int
+	Patient_id   int
+	Doctor_id    int
 	Booking_time string
 }

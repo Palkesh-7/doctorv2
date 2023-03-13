@@ -169,6 +169,11 @@ func DeletePatient() gin.HandlerFunc {
 	}
 }
 
+type TimeStr struct {
+	Opening_time string
+	Closing_time string
+}
+
 func BookingAppointment() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		db, err := sql.Open("mysql", "root:india@123@tcp(localhost:3306)/das")
@@ -180,7 +185,7 @@ func BookingAppointment() gin.HandlerFunc {
 		// var Doctor_str doctor
 		var booking_data models.Appointment
 		err = c.BindJSON(&booking_data)
-		get_booking_time := fmt.Sprintf("SELECT Opening_time,Closing_time, FROM Doctor WHERE id = %d", booking_data.Doctor_id)
+		get_booking_time := fmt.Sprintf("SELECT Opening_time,Closing_time FROM Doctor WHERE id = %d", booking_data.Doctor_id)
 		doctor_result, err := db.Query(get_booking_time)
 		// doctor_result,err := db.Exec(get_booking_time)
 		if err != nil {
@@ -188,31 +193,42 @@ func BookingAppointment() gin.HandlerFunc {
 			return
 		}
 
-		var Opening_time string
+		var people []TimeStr
 
-		var Closing_time string
-		err = doctor_result.Scan(&Opening_time, &Closing_time)
-
-		if err != nil {
-
-			panic(err.Error())
-
+		for doctor_result.Next() {
+			var p TimeStr
+			if err := doctor_result.Scan(&p.Opening_time, &p.Closing_time); err != nil {
+				log.Fatal(err)
+			}
+			people = append(people, p)
 		}
+
+		if err := doctor_result.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+		var Opentime string = people[0].Opening_time
+
+		var Closetime string = people[0].Closing_time
 
 		c.IndentedJSON(http.StatusCreated, booking_data)
 
-		booking_data.Booking_time = Opening_time
+		booking_data.Booking_time = Opentime
 
-		query_data := fmt.Sprintf(`INSERT INTO Appointment VALUES(%d,%d,'%s')`, booking_data.Patient_id, booking_data.Doctor_id, booking_data.Booking_time)
+		query_data := fmt.Sprintf(`INSERT INTO appointment (Patient_id,Doctor_id,Booking_time) VALUES(%d,%d,'%s')`, booking_data.Patient_id, booking_data.Doctor_id, booking_data.Booking_time)
 		_, err = db.Exec(query_data)
 		if err != nil {
 
 			panic(err.Error())
 
 		}
-		t1 := add_time(Opening_time)
-		t2 := add_time(Closing_time)
-		query_data2 := fmt.Sprintf(`UPDATE Doctor SET Opening_time = %s,Closing_time = %s WHERE ID = %d`, t1, t2, booking_data.Doctor_id)
+		t1 := add_time(Opentime)
+		t2 := add_time(Closetime)
+
+		query_data2 := fmt.Sprintf(`UPDATE Doctor SET Opening_time = '%s',Closing_time = '%s' WHERE ID = %d`, t1, t2, booking_data.Doctor_id)
+
+		fmt.Println(query_data2)
+
 		_, err = db.Query(query_data2)
 		if err != nil {
 
