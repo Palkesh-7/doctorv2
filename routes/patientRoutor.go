@@ -9,8 +9,9 @@ import (
 
 func PatientRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.Use(middleware.Authenticate())
-	incomingRoutes.POST("/addpatient", controller.Addpatient())
-	incomingRoutes.DELETE("/delete/patient", controller.DeletePatient())
+	incomingRoutes.POST("/patient", controller.Addpatient())
+	incomingRoutes.GET("/get_my_details", controller.Get_my_details())
+	incomingRoutes.DELETE("/patient", controller.DeletePatient())
 	incomingRoutes.GET("/showall/doctors", controller.Get_docter())
 	incomingRoutes.GET("/get_doctor_by_city", controller.GetDoctorByLocation())
 	incomingRoutes.POST("/bookappointment", controller.BookingAppointment())

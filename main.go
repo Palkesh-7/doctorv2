@@ -60,16 +60,18 @@ func Connect() {
 
 	// Create Docter table
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS doctor(ID INT NOT NULL AUTO_INCREMENT, Name VARCHAR(30),Gender VARCHAR(10),Address VARCHAR(50), City VARCHAR(20),Phone VARCHAR(15),Specialisation VARCHAR(20),Opening_time VARCHAR(10),Closing_time VARCHAR(10),Availabilty VARCHAR(30),Fees INT ,PRIMARY KEY (ID) );")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS doctor(ID INT NOT NULL AUTO_INCREMENT, Name VARCHAR(30),Gender VARCHAR(10),Address VARCHAR(50), City VARCHAR(20),Phone VARCHAR(15),Specialisation VARCHAR(20),Opening_time VARCHAR(10),Closing_time VARCHAR(10),Availabilty_Time  VARCHAR(10),Availabilty VARCHAR(30),Fees INT ,PRIMARY KEY (ID) );")
 
 	if err != nil {
 
 		panic(err.Error())
 
 	}
-
 	fmt.Println("Docter Table Created")
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Appointment(Bookingid INT NOT NULL AUTO_INCREMENT,Patient_id INT,Doctor_id INT,Booking_time VARCHAR(10),PRIMARY KEY (Bookingid),FOREIGN KEY (Patient_id) REFERENCES Patient(ID),FOREIGN KEY (Doctor_id) REFERENCES Doctor(ID));")
+
+	// Create Appoitment table
+
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS Appoitment(Bookingid INT NOT NULL AUTO_INCREMENT,Patient_id INT,Doctor_id INT,Booking_time VARCHAR(10),PRIMARY KEY (Bookingid),FOREIGN KEY (Patient_id) REFERENCES Patient(ID),FOREIGN KEY (Doctor_id) REFERENCES Doctor(ID));")
 
 	if err != nil {
 

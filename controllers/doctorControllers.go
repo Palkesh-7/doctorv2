@@ -318,3 +318,81 @@ func GetDoctorByLocation() gin.HandlerFunc {
 
 	}
 }
+
+func CheckMyAppointment() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		db, err := sql.Open("mysql", "root:india@123@tcp(localhost:3306)/das")
+		if err != nil {
+
+			log.Fatal(err)
+
+		}
+
+		var data models.Doctor
+
+		err = c.BindJSON(&data)
+
+		if err != nil {
+
+			return
+
+		}
+
+		// _, err = db.Exec("DELETE FROM Dost WHERE id = 10")
+
+		Get_query := fmt.Sprintf("SELECT patient.Name,patient.Age,patient.Gender,patient.Address,patient.City,patient.Phone,patient.Disease,patient.Patient_history,appointment.Booking_time FROM appointment INNER JOIN patient ON appointment.Patient_id = patient.id where appointment.Doctor_id = %d", data.ID)
+
+		GetResult, err := db.Query(Get_query)
+
+		if err != nil {
+
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+			return
+
+		}
+
+		defer GetResult.Close()
+
+		c.JSON(http.StatusOK, gin.H{"message": "Your Appointment"})
+
+		var output interface{}
+
+		for GetResult.Next() {
+
+			var Name string
+
+			var Age int
+
+			var Gender string
+
+			var Address string
+
+			var City string
+
+			var Phone string
+
+			var Disease string
+
+			var Selected_Specialisation string
+
+			var Patient_history string
+
+			var Booking_time string
+
+			err = GetResult.Scan(&Name, &Age, &Gender, &Address, &City, &Phone, &Disease, &Patient_history, &Booking_time)
+
+			if err != nil {
+
+				panic(err.Error())
+
+			}
+
+			output = fmt.Sprintf("'%s' %d  '%s'  %s  '%s'  '%s'  '%s' '%s' '%s','%s", Name, Age, Gender, Address, City, Phone, Disease, Selected_Specialisation, Patient_history, Booking_time)
+
+			c.JSON(http.StatusOK, gin.H{"Data": output})
+
+		}
+
+	}
+}

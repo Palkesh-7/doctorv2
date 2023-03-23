@@ -70,34 +70,29 @@ func Addpatient() gin.HandlerFunc {
 
 		defer insert.Close()
 
-		c.JSON(http.StatusOK, gin.H{"message": "Patient added successfully"})
-
 	}
 }
-
-func Getpatient() gin.HandlerFunc {
+func Get_my_details() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		db, err := sql.Open("mysql", "root:india@123@tcp(localhost:3306)/das")
 		if err != nil {
-
 			log.Fatal(err)
-
 		}
-		fmt.Println("Connection Created")
-		results, err := db.Query("SELECT * FROM Patient")
-		fmt.Println("Quary exicuted")
-
+		var mob models.Patient
+		err = c.BindJSON(&mob)
 		if err != nil {
-
-			panic(err.Error())
-
+			return
 		}
-
-		defer results.Close()
+		get_detail := fmt.Sprintf("SELECT * FROM Patient WHERE Phone = '%s'", mob.Phone)
+		detail, err := db.Query(get_detail)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer detail.Close()
 
 		var output interface{}
-
-		for results.Next() {
+		for detail.Next() {
 
 			var ID int
 			var Name string
@@ -109,24 +104,77 @@ func Getpatient() gin.HandlerFunc {
 			var Disease string
 			var Selected_specialisation string
 			var Patient_history string
-			err = results.Scan(&ID, &Name, &Age, &Gender, &Address, &City, &Phone, &Disease, &Selected_specialisation, &Patient_history)
+			err = detail.Scan(&ID, &Name, &Age, &Gender, &Address, &City, &Phone, &Disease, &Selected_specialisation, &Patient_history)
 
 			if err != nil {
-
 				panic(err.Error())
-
 			}
-
 			output = fmt.Sprintf("%d  '%s'  %d  '%s'  '%s'  '%s'  '%s' '%s' %s' '%s'  ", ID, Name, Age, Gender, Address, City, Phone, Disease, Selected_specialisation, Patient_history)
 
 			fmt.Println(output)
 
-			c.JSON(http.StatusOK, gin.H{"Data": output})
+			c.JSON(http.StatusOK, gin.H{"Patient details": output})
 
 		}
 
+		c.JSON(http.StatusOK, gin.H{"message": "Patient Deleted successfully"})
+
 	}
 }
+
+// func Getpatient() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		db, err := sql.Open("mysql", "root:india@123@tcp(localhost:3306)/das")
+// 		if err != nil {
+
+// 			log.Fatal(err)
+
+// 		}
+// 		fmt.Println("Connection Created")
+// 		results, err := db.Query("SELECT * FROM Patient")
+// 		fmt.Println("Quary exicuted")
+//
+
+// 		if err != nil {
+
+// 			panic(err.Error())
+
+// 		}
+
+// 		defer results.Close()
+
+// 		var output interface{}
+
+// 		for results.Next() {
+
+// 			var ID int
+// 			var Name string
+// 			var Age int
+// 			var Gender string
+// 			var Address string
+// 			var City string
+// 			var Phone string
+// 			var Disease string
+// 			var Selected_specialisation string
+// 			var Patient_history string
+// 			err = results.Scan(&ID, &Name, &Age, &Gender, &Address, &City, &Phone, &Disease, &Selected_specialisation, &Patient_history)
+
+// 			if err != nil {
+
+// 				panic(err.Error())
+
+// 			}
+
+// 			output = fmt.Sprintf("%d  '%s'  %d  '%s'  '%s'  '%s'  '%s' '%s' %s' '%s'  ", ID, Name, Age, Gender, Address, City, Phone, Disease, Selected_specialisation, Patient_history)
+
+// 			fmt.Println(output)
+
+// 			c.JSON(http.StatusOK, gin.H{"Data": output})
+
+// 		}
+
+// 	}
+// }
 
 func DeletePatient() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -170,8 +218,8 @@ func DeletePatient() gin.HandlerFunc {
 }
 
 type TimeStr struct {
-	Opening_time string
-	Closing_time string
+	Availabilty_Time string
+	Closing_time     string
 }
 
 func BookingAppointment() gin.HandlerFunc {
@@ -185,7 +233,11 @@ func BookingAppointment() gin.HandlerFunc {
 		// var Doctor_str doctor
 		var booking_data models.Appointment
 		err = c.BindJSON(&booking_data)
-		get_booking_time := fmt.Sprintf("SELECT Opening_time,Closing_time FROM Doctor WHERE id = %d", booking_data.Doctor_id)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		get_booking_time := fmt.Sprintf("SELECT Availabilty_Time,Closing_time FROM Doctor WHERE id = %d", booking_data.Doctor_id)
 		doctor_result, err := db.Query(get_booking_time)
 		// doctor_result,err := db.Exec(get_booking_time)
 		if err != nil {
@@ -197,7 +249,7 @@ func BookingAppointment() gin.HandlerFunc {
 
 		for doctor_result.Next() {
 			var p TimeStr
-			if err := doctor_result.Scan(&p.Opening_time, &p.Closing_time); err != nil {
+			if err := doctor_result.Scan(&p.Availabilty_Time, &p.Closing_time); err != nil {
 				log.Fatal(err)
 			}
 			people = append(people, p)
@@ -207,13 +259,17 @@ func BookingAppointment() gin.HandlerFunc {
 			log.Fatal(err)
 		}
 
-		var Opentime string = people[0].Opening_time
+		var booktime string = people[0].Availabilty_Time
+		var Closing_time string = people[1].Closing_time
 
-		var Closetime string = people[0].Closing_time
+		if Closing_time == booktime {
+			c.JSON(http.StatusOK, gin.H{"message": "No slot available visit again thank you"})
+
+		}
 
 		c.IndentedJSON(http.StatusCreated, booking_data)
 
-		booking_data.Booking_time = Opentime
+		booking_data.Booking_time = booktime
 
 		query_data := fmt.Sprintf(`INSERT INTO appointment (Patient_id,Doctor_id,Booking_time) VALUES(%d,%d,'%s')`, booking_data.Patient_id, booking_data.Doctor_id, booking_data.Booking_time)
 		_, err = db.Exec(query_data)
@@ -222,10 +278,9 @@ func BookingAppointment() gin.HandlerFunc {
 			panic(err.Error())
 
 		}
-		t1 := add_time(Opentime)
-		t2 := add_time(Closetime)
+		t1 := add_time(booktime)
 
-		query_data2 := fmt.Sprintf(`UPDATE Doctor SET Opening_time = '%s',Closing_time = '%s' WHERE ID = %d`, t1, t2, booking_data.Doctor_id)
+		query_data2 := fmt.Sprintf(`UPDATE Doctor SET Availabilty_Time = '%s' WHERE ID = %d`, t1, booking_data.Doctor_id)
 
 		fmt.Println(query_data2)
 
@@ -268,7 +323,7 @@ func Cancel_appointment() gin.HandlerFunc {
 
 		c.IndentedJSON(http.StatusCreated, data)
 
-		query_data := fmt.Sprintf("DELETE FROM Doctor WHERE id =%d", data.Bookingid)
+		query_data := fmt.Sprintf("DELETE FROM appointment WHERE id =%d", data.Bookingid)
 
 		_, err = db.Exec(query_data)
 
