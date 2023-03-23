@@ -30,7 +30,7 @@ func Add_docter() gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusCreated, data)
-		query_data := fmt.Sprintf(`INSERT INTO Doctor (Name,Gender,Address,City,Phone,Specialisation,Opening_time,Closing_time,Availabilty,Fees) VALUES ( '%s','%s','%s','%s','%s','%s','%s','%s','%s',%f)`, data.Name, data.Gender, data.Address, data.City, data.Phone, data.Specialisation, data.Opening_time, data.Closing_time, data.Availabilty, data.Fees)
+		query_data := fmt.Sprintf(`INSERT INTO Doctor (Name,Gender,Address,City,Phone,Specialisation,Opening_time,Closing_time,Availabilty,Availabilty_Time,Fees) VALUES ( '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%f)`, data.Name, data.Gender, data.Address, data.City, data.Phone, data.Specialisation, data.Opening_time, data.Closing_time, data.Availabilty, data.Availabilty_Time, data.Fees)
 		fmt.Println(query_data)
 		//insert data
 		insert, err := db.Query(query_data)
@@ -89,9 +89,11 @@ func Get_docter() gin.HandlerFunc {
 
 			var Availability string
 
+			var Availabilty_Time string
+
 			var Fees float64
 
-			err = results.Scan(&ID, &Name, &Gender, &Address, &City, &Phone, &Specialisation, &Opening_time, &Closing_time, &Availability, &Fees)
+			err = results.Scan(&ID, &Name, &Gender, &Address, &City, &Phone, &Specialisation, &Opening_time, &Closing_time, &Availability, &Availabilty_Time, &Fees)
 
 			if err != nil {
 
@@ -99,7 +101,7 @@ func Get_docter() gin.HandlerFunc {
 
 			}
 
-			output = fmt.Sprintf("%d  '%s'  '%s'  %s  '%s'  '%s'  '%s' '%s' '%s' '%s' %f", ID, Name, Gender, Address, City, Phone, Specialisation, Opening_time, Closing_time, Availability, Fees)
+			output = fmt.Sprintf("%d  '%s'  '%s'  %s  '%s'  '%s'  '%s' '%s' '%s' '%s' '%s' %f", ID, Name, Gender, Address, City, Phone, Specialisation, Opening_time, Closing_time, Availability, Availabilty_Time, Fees)
 
 			c.JSON(http.StatusOK, gin.H{"Data": output})
 
@@ -158,15 +160,20 @@ func Update_docter() gin.HandlerFunc {
 		fmt.Println(updateColumns, args)
 		if data.Closing_time != "" {
 			updateColumns = append(updateColumns, "Closing_time = ?")
-			args = append(args, data.Opening_time)
+			args = append(args, data.Closing_time)
 		}
 		fmt.Println(updateColumns, args)
 		if data.Availabilty != "" {
 			updateColumns = append(updateColumns, "Availabilty = ?")
-			args = append(args, data.Opening_time)
+			args = append(args, data.Availabilty)
 		}
 		fmt.Println(updateColumns, args)
 
+		if data.Availabilty_Time != "" {
+			updateColumns = append(updateColumns, "Availabilty_Time = ?")
+			args = append(args, data.Availabilty_Time)
+		}
+		fmt.Println(updateColumns, args)
 		if data.Fees != 0 {
 			updateColumns = append(updateColumns, "Fees = ?")
 			args = append(args, data.Fees)
@@ -300,9 +307,11 @@ func GetDoctorByLocation() gin.HandlerFunc {
 
 			var Availability string
 
+			var Availabilty_Time string
+
 			var Fees float64
 
-			err = results.Scan(&ID, &Name, &Gender, &Address, &City, &Phone, &Specialisation, &Opening_time, &Closing_time, &Availability, &Fees)
+			err = results.Scan(&ID, &Name, &Gender, &Address, &City, &Phone, &Specialisation, &Opening_time, &Closing_time, &Availability, &Availabilty_Time, &Fees)
 
 			if err != nil {
 
@@ -310,7 +319,7 @@ func GetDoctorByLocation() gin.HandlerFunc {
 
 			}
 
-			output = fmt.Sprintf("%d  '%s'  '%s'  %s  '%s'  '%s'  '%s' '%s' '%s' '%s' %f", ID, Name, Gender, Address, City, Phone, Specialisation, Opening_time, Closing_time, Availability, Fees)
+			output = fmt.Sprintf("%d  '%s'  '%s'  %s  '%s'  '%s'  '%s' '%s' '%s' '%s' '%s' %f", ID, Name, Gender, Address, City, Phone, Specialisation, Opening_time, Closing_time, Availability, Availabilty_Time, Fees)
 
 			c.JSON(http.StatusOK, gin.H{"Data": output})
 
